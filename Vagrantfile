@@ -11,6 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ubuntu/bionic64"
+  config.disksize.size = '150GB'
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -21,6 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 8888, host: 8888
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -58,12 +60,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #    	      "--port", "0", "--device", "1", "--type", "dvddrive", "--medium", "emptydrive"] 
     #else
     #	vb.customize ["storageattach", :id, "--storagectl", "SATAController", 
-    #   	      "--port", "0", "--device", "1", "--type", "dvddrive", "--medium", "emptydrive"] 
+    #    	      "--port", "0", "--device", "1", "--type", "dvddrive", "--medium", "emptydrive"] 
     #end
     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
   end
 
-  # Install xfce
+  # Provision
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get -y upgrade"
   config.vm.provision "shell", inline: "sudo apt-get install -y linux-headers-$(uname -r) build-essential dkms xubuntu-core virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11"
@@ -77,8 +79,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #config.vm.provision "shell", inline: "sudo rmdir /media/VBoxGuestAddition"
   # Permit anyone to start the GUI
   #config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
-  config.vm.provision "shell", inline: "sudo apt-get install -y docker docker-compose git"
-  config.vm.provision "shell", inline: "sudo snap install vscode --classic"
+  config.vm.provision "shell", inline: "sudo apt-get install -y docker docker-compose git zsh"
+  config.vm.provision "shell", inline: "test -e ~/.oh-my-zsh || git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh", privileged: false
+  config.vm.provision "shell", inline: "test -e ~/.zshrc || cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc", privileged: false
+  #config.vm.provision "shell", inline: "sudo chsh -s $(which zsh) vagrant"
+  #config.vm.provision "shell", inline: "sudo snap install vscode --classic"
+  config.vm.provision "shell", inline: "sudo apt-get install -y firefox"
+  config.vm.provision "shell", inline: "sudo usermod -a -G docker vagrant"
+  config.vm.provision "shell", inline: "test -e Miniconda3-latest-Linux-x86_64.sh || wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh", privileged: false
+  config.vm.provision "shell", inline: "test -e $HOME/miniconda3 || /bin/bash Miniconda3-latest-Linux-x86_64.sh -b", privileged: false
+  config.vm.provision "shell", inline: "echo \". $HOME/miniconda3/etc/profile.d/conda.sh\" >> ~/.bashrc", privileged: false
+  config.vm.provision "shell", inline: "echo \". $HOME/miniconda3/etc/profile.d/conda.sh\" >> ~/.zshrc", privileged: false
+  config.vm.provision "shell", inline: "$HOME/miniconda3/bin/conda update -y --all", privileged: false
+  config.vm.provision "shell", inline: "sudo userdel -r ubuntu || :"
+  #config.vm.provision "shell", inline: "test -e hadoop-2.9.2.tar.gz || wget http://apache.cs.utah.edu/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz", privileged: false
+  #config.vm.provision "shell", inline: "test -e hadoop-2.9.2 || tar zxvf hadoop-2.9.2.tar.gz", privileged: false
+  #config.vm.provision "shell", inline: "sudo apt-get install -y default-jre"
+  #config.vm.provision "shell", inline: "echo \"export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64\" >> ~/.bashrc", privileged: false
+  #config.vm.provision "shell", inline: "echo \"export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64\" >> ~/.zshrc", privileged: false
+  #config.vm.provision "shell", inline: "echo \"export HADOOP_HOME=$HOME/hadoop-2.9.2\" >> ~/.bashrc", privileged: false
+  #config.vm.provision "shell", inline: "echo \"export HADOOP_HOME=$HOME/hadoop-2.9.2\" >> ~/.zshrc", privileged: false
+  #config.vm.provision "shell", inline: "echo \"export PATH=$HOME/hadoop-2.9.2/bin:$PATH\" >> ~/.bashrc", privileged: false
+  #config.vm.provision "shell", inline: "echo \"export PATH=$HOME/hadoop-2.9.2/bin:$PATH\" >> ~/.zshrc", privileged: false
   
   #
   # View the documentation for the provider you're using for more
